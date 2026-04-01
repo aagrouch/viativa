@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Viativa</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0e0e0e;
+  --s1: #161616;
+  --s2: #1e1e1e;
+  --s3: #262626;
+  --border: #2e2e2e;
+  --text: #f0ede8;
+  --muted: #666;
+  --muted2: #999;
+  --gold: #c9a84c;
+  --gold2: #e8c876;
+  --red: #c0392b;
+  --amber: #e67e22;
+  --green: #27ae60;
+  --teal: #16a085;
+  --r: 10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;display:flex;flex-direction:column;}
+
+/* HEADER */
+#header{padding:16px 18px 12px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;gap:12px;}
+.logo{font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--gold);letter-spacing:1px;line-height:1;}
+.logo-sub{font-family:'Outfit',sans-serif;font-size:.55rem;color:var(--muted);letter-spacing:4px;text-transform:uppercase;margin-top:2px;}
+#header-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
+.profile-chip{background:var(--s2);border:1px solid var(--border);border-radius:20px;padding:4px 10px;font-size:.62rem;font-family:'Outfit',monospace;color:var(--muted2);cursor:pointer;transition:all .2s;}
+.profile-chip:hover{border-color:var(--gold);color:var(--gold);}
+.profile-chip.active{border-color:var(--green);color:var(--green);}
+
+/* NAV */
+#nav{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;}
+.nav-btn{flex:1;padding:12px 4px;text-align:center;font-size:.62rem;font-family:'Outfit',sans-serif;letter-spacing:1px;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;user-select:none;font-weight:500;}
+.nav-btn.active{color:var(--gold);border-bottom-color:var(--gold);}
+.nav-btn:hover:not(.active){color:var(--text);}
+
+/* PANELS */
+#panels{flex:1;overflow:hidden;position:relative;}
+.panel{position:absolute;inset:0;overflow-y:auto;display:none;padding:18px;}
+.panel.active{display:block;}
+.panel-inner{max-width:540px;margin:0 auto;}
+
+/* CARDS */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:12px;}
+.card-gold{border-color:var(--gold);border-left:3px solid var(--gold);}
+
+/* SECTION TITLES */
+.sec{font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--text);display:flex;align-items:center;gap:10px;margin:20px 0 12px;}
+.sec:first-child{margin-top:0;}
+.sec::after{content:'';flex:1;height:1px;background:var(--border);}
+.label{font-size:.6rem;font-family:'Outfit',sans-serif;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;font-weight:500;}
+
+/* INPUTS */
+input,textarea,select{background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Outfit',sans-serif;font-size:.88rem;padding:10px 12px;width:100%;outline:none;transition:border-color .2s;appearance:none;}
+input:focus,textarea:focus,select:focus{border-color:var(--gold);}
+textarea{resize:vertical;min-height:80px;}
+select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;}
+.igroup{display:flex;flex-direction:column;gap:6px;margin-bottom:10px;}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 16px;border-radius:6px;font-family:'Outfit',sans-serif;font-size:.75rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border:none;transition:all .15s;font-weight:500;white-space:nowrap;}
+.btn-gold{background:var(--gold);color:#000;}
+.btn-gold:hover{background:var(--gold2);}
+.btn-ghost{background:var(--s2);border:1px solid var(--border);color:var(--text);}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
+.btn-full{width:100%;}
+.btn-sm{padding:7px 12px;font-size:.65rem;}
+.btn-row{display:flex;gap:8px;margin-top:10px;}
+
+/* TAGS */
+.tag{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:.65rem;font-family:'Outfit',sans-serif;font-weight:500;letter-spacing:.5px;}
+.tag-avoid{background:rgba(192,57,43,.15);color:#e74c3c;border:1px solid rgba(192,57,43,.3);}
+.tag-caution{background:rgba(230,126,34,.15);color:#e67e22;border:1px solid rgba(230,126,34,.3);}
+.tag-good{background:rgba(39,174,96,.15);color:#2ecc71;border:1px solid rgba(39,174,96,.3);}
+.tag-neutral{background:var(--s3);color:var(--muted2);border:1px solid var(--border);}
+
+/* RESTRICTION CHIPS */
+.restriction-grid{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0;}
+.r-chip{padding:6px 12px;border-radius:20px;font-size:.72rem;font-family:'Outfit',sans-serif;cursor:pointer;border:1px solid var(--border);background:var(--s2);color:var(--muted2);transition:all .15s;font-weight:400;}
+.r-chip.selected{background:rgba(201,168,76,.15);border-color:var(--gold);color:var(--gold);}
+.r-chip.avoid-selected{background:rgba(192,57,43,.15);border-color:#e74c3c;color:#e74c3c;}
+
+/* PROFILE SUMMARY */
+.profile-flag{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);}
+.profile-flag:last-child{border-bottom:none;}
+.flag-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.flag-name{flex:1;font-size:.85rem;}
+.flag-level{font-size:.62rem;font-family:'Outfit',monospace;color:var(--muted);}
+
+/* DINING */
+.mode-toggle{display:flex;gap:8px;margin-bottom:14px;}
+.ingredient-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);}
+.ingredient-row:last-child{border-bottom:none;}
+.ing-name{flex:1;font-size:.85rem;}
+.ing-reason{font-size:.65rem;color:var(--muted);max-width:110px;text-align:right;line-height:1.3;}
+
+/* DISH RESULT */
+.dish-verdict{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.verdict-name{font-family:'Playfair Display',serif;font-size:1.1rem;flex:1;}
+.dish-summary{font-size:.78rem;color:var(--muted2);margin-bottom:12px;line-height:1.5;}
+.dish-tip{margin-top:10px;padding:10px 12px;background:var(--s2);border-radius:6px;font-size:.78rem;color:var(--muted2);line-height:1.5;border-left:2px solid var(--gold);}
+
+/* RESTAURANT RESULT */
+.rec-dish{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:8px;border-left:3px solid var(--green);}
+.rec-dish-name{font-family:'Playfair Display',serif;font-size:1rem;margin-bottom:4px;}
+.rec-why{font-size:.75rem;color:var(--muted2);margin-bottom:6px;line-height:1.4;}
+.rec-tip{font-size:.68rem;color:var(--gold);font-family:'Outfit',monospace;}
+.avoid-dish{display:flex;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);}
+.avoid-dish:last-child{border-bottom:none;}
+
+/* UPLOAD AREA */
+.upload-area{border:2px dashed var(--border);border-radius:var(--r);padding:28px 16px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:10px;}
+.upload-area:hover{border-color:var(--gold);background:rgba(201,168,76,.04);}
+.upload-icon{font-size:2rem;margin-bottom:8px;}
+.upload-label{font-size:.85rem;color:var(--muted2);line-height:1.6;}
+
+/* ONBOARDING */
+.onboard-step{display:none;}
+.onboard-step.active{display:block;}
+.step-indicator{display:flex;gap:6px;margin-bottom:20px;}
+.step-dot{flex:1;height:3px;border-radius:2px;background:var(--border);transition:background .3s;}
+.step-dot.done{background:var(--gold);}
+
+/* LOADING */
+.ai-loading{text-align:center;padding:24px;color:var(--muted);font-size:.75rem;letter-spacing:2px;text-transform:uppercase;}
+.ai-loading::after{content:'';animation:dots 1.2s infinite;}
+@keyframes dots{0%{content:''}33%{content:'.'}66%{content:'..'}100%{content:'...'}}
+
+/* TOAST */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--gold);color:#000;font-family:'Outfit',sans-serif;font-size:.72rem;letter-spacing:1px;padding:9px 18px;border-radius:20px;opacity:0;transition:all .25s;pointer-events:none;z-index:999;white-space:nowrap;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+.empty{text-align:center;padding:28px;color:var(--muted);font-size:.75rem;line-height:1.9;letter-spacing:.5px;}
+
+/* DISCLAIMER */
+.disclaimer{background:rgba(192,57,43,.08);border:1px solid rgba(192,57,43,.2);border-radius:var(--r);padding:12px 14px;font-size:.72rem;color:#e57373;line-height:1.6;margin-bottom:14px;}
+
+@media(min-width:560px){
+  .panel-inner{max-width:540px;}
+  #header{padding:16px 24px 12px;}
+  .panel{padding:20px 24px;}
+}
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div>
+    <div class="logo">Viativa</div>
+    <div class="logo-sub">Food Sensitivity Advisor</div>
+  </div>
+  <div id="header-right">
+    <div class="profile-chip" id="profile-status" onclick="goToProfile()">No profile</div>
+  </div>
+</div>
+
+<div id="nav">
+  <div class="nav-btn active" data-panel="profile">👤 Profile</div>
+  <div class="nav-btn" data-panel="dining">🍜 Dining</div>
+  <div class="nav-btn" data-panel="about">ℹ About</div>
+</div>
+
+<div id="panels">
+
+  <!-- ══════════════ PROFILE ══════════════ -->
+  <div class="panel active" id="panel-profile">
+    <div class="panel-inner">
+
+      <!-- Onboarding (shown when no profile) -->
+      <div id="onboarding" style="display:none;">
+        <div style="text-align:center;padding:10px 0 20px;">
+          <div style="font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--gold);margin-bottom:8px;">Welcome to Viativa</div>
+          <div style="font-size:.85rem;color:var(--muted2);line-height:1.7;max-width:340px;margin:0 auto;">Tell us about your food sensitivities and we'll personalize every dining recommendation for you.</div>
+        </div>
+
+        <div class="step-indicator">
+          <div class="step-dot done" id="step0"></div>
+          <div class="step-dot" id="step1"></div>
+          <div class="step-dot" id="step2"></div>
+        </div>
+
+        <!-- Step 1: Choose method -->
+        <div class="onboard-step active" id="ob-step-0">
+          <div class="sec">How would you like to set up?</div>
+          <div class="card" style="cursor:pointer;margin-bottom:10px;" onclick="goToStep(1, 'upload')">
+            <div style="display:flex;align-items:center;gap:14px;">
+              <div style="font-size:1.8rem;">📄</div>
+              <div>
+                <div style="font-weight:500;margin-bottom:4px;">Upload Lab Results</div>
+                <div style="font-size:.78rem;color:var(--muted2);line-height:1.5;">Upload a PDF or photo of your IgG food sensitivity test, blood work, or allergy panel. AI will read and extract your restrictions automatically.</div>
+              </div>
+            </div>
+          </div>
+          <div class="card" style="cursor:pointer;" onclick="goToStep(1, 'manual')">
+            <div style="display:flex;align-items:center;gap:14px;">
+              <div style="font-size:1.8rem;">✏️</div>
+              <div>
+                <div style="font-weight:500;margin-bottom:4px;">Enter Manually</div>
+                <div style="font-size:.78rem;color:var(--muted2);line-height:1.5;">Select your known food sensitivities, intolerances, or dietary restrictions from a list or type them in.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2a: Upload -->
+        <div class="onboard-step" id="ob-step-1-upload">
+          <div class="sec">Upload Your Results</div>
+          <div class="disclaimer">
+            ⚠ This app is designed for food sensitivities and dietary optimization — not life-threatening allergies. Always verify ingredients directly with restaurants if you have a severe allergy.
+          </div>
+          <div class="upload-area" onclick="document.getElementById('lab-file').click()">
+            <div class="upload-icon">📋</div>
+            <div class="upload-label">Tap to upload your lab results<br><span style="font-size:.7rem;color:var(--muted);">PDF or image (JPG, PNG)</span></div>
+          </div>
+          <input type="file" id="lab-file" accept=".pdf,.jpg,.jpeg,.png" style="display:none;" onchange="handleLabUpload(event)">
+          <div id="upload-status" style="text-align:center;font-size:.78rem;color:var(--muted);margin:8px 0;"></div>
+          <div id="upload-preview" style="display:none;">
+            <div class="card">
+              <div class="label">Detected file</div>
+              <div id="upload-filename" style="font-size:.85rem;color:var(--gold);margin-bottom:8px;"></div>
+              <button class="btn btn-gold btn-full" onclick="analyzeLabFile()">Analyze with AI</button>
+            </div>
+          </div>
+          <button class="btn btn-ghost btn-full" onclick="goToStep(0)" style="margin-top:8px;">← Back</button>
+        </div>
+
+        <!-- Step 2b: Manual -->
+        <div class="onboard-step" id="ob-step-1-manual">
+          <div class="sec">Your Restrictions</div>
+          <div class="disclaimer">
+            ⚠ This app is designed for food sensitivities — not life-threatening allergies. Always verify ingredients directly with restaurants if you have a severe allergy.
+          </div>
+          <div class="igroup">
+            <div class="label">Common sensitivities — tap to select</div>
+            <div class="restriction-grid" id="common-restrictions">
+              <div class="r-chip" data-val="dairy" onclick="toggleChip(this)">Dairy</div>
+              <div class="r-chip" data-val="gluten" onclick="toggleChip(this)">Gluten / Wheat</div>
+              <div class="r-chip" data-val="eggs" onclick="toggleChip(this)">Eggs</div>
+              <div class="r-chip" data-val="peanuts" onclick="toggleChip(this)">Peanuts</div>
+              <div class="r-chip" data-val="tree nuts" onclick="toggleChip(this)">Tree Nuts</div>
+              <div class="r-chip" data-val="soy" onclick="toggleChip(this)">Soy</div>
+              <div class="r-chip" data-val="shellfish" onclick="toggleChip(this)">Shellfish</div>
+              <div class="r-chip" data-val="fish" onclick="toggleChip(this)">Fish</div>
+              <div class="r-chip" data-val="corn" onclick="toggleChip(this)">Corn</div>
+              <div class="r-chip" data-val="nightshades" onclick="toggleChip(this)">Nightshades</div>
+              <div class="r-chip" data-val="oats" onclick="toggleChip(this)">Oats</div>
+              <div class="r-chip" data-val="refined sugar" onclick="toggleChip(this)">Refined Sugar</div>
+              <div class="r-chip" data-val="alcohol" onclick="toggleChip(this)">Alcohol</div>
+              <div class="r-chip" data-val="caffeine" onclick="toggleChip(this)">Caffeine</div>
+            </div>
+          </div>
+          <div class="igroup">
+            <div class="label">Any other restrictions or notes</div>
+            <textarea id="manual-extra" placeholder="e.g. Low FODMAP, high blood pressure, borderline diabetes, specific foods to avoid…"></textarea>
+          </div>
+          <div class="igroup">
+            <div class="label">Your name (optional)</div>
+            <input type="text" id="manual-name" placeholder="First name">
+          </div>
+          <button class="btn btn-gold btn-full" onclick="saveManualProfile()">Save My Profile →</button>
+          <button class="btn btn-ghost btn-full" onclick="goToStep(0)" style="margin-top:8px;">← Back</button>
+        </div>
+
+        <!-- Step 3: AI analyzing lab -->
+        <div class="onboard-step" id="ob-step-2">
+          <div id="analyzing-content">
+            <div class="card" style="text-align:center;padding:28px;">
+              <div class="ai-loading">Reading your results</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Profile Summary (shown when profile exists) -->
+      <div id="profile-summary" style="display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <div>
+            <div style="font-family:'Playfair Display',serif;font-size:1.4rem;" id="profile-name-display">Your Profile</div>
+            <div style="font-size:.68rem;color:var(--muted);margin-top:2px;" id="profile-source-display"></div>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="resetProfile()">Reset</button>
+        </div>
+
+        <div class="sec">Foods to Avoid</div>
+        <div class="card" id="profile-avoid-list"></div>
+
+        <div class="sec">Foods to Limit</div>
+        <div class="card" id="profile-limit-list"></div>
+
+        <div class="sec">Notes</div>
+        <div class="card" id="profile-notes-display"></div>
+
+        <button class="btn btn-gold btn-full" onclick="switchTab('dining')" style="margin-top:4px;">Go to Dining Advisor →</button>
+        <div style="height:28px;"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════ DINING ══════════════ -->
+  <div class="panel" id="panel-dining">
+    <div class="panel-inner">
+
+      <div id="dining-no-profile" style="display:none;">
+        <div class="empty">Set up your profile first<br>to get personalized recommendations.<br><br>
+          <button class="btn btn-gold" onclick="switchTab('profile')">Set Up Profile →</button>
+        </div>
+      </div>
+
+      <div id="dining-content">
+        <!-- Mode toggle -->
+        <div class="mode-toggle">
+          <button class="btn btn-gold btn-full" id="mode-dish-btn" onclick="setDiningMode('dish')" style="flex:1;">🍴 Analyze a Dish</button>
+          <button class="btn btn-ghost" id="mode-rest-btn" onclick="setDiningMode('restaurant')" style="flex:1;">🏪 Restaurant</button>
+        </div>
+
+        <!-- Dish mode -->
+        <div id="dining-dish-mode">
+          <div class="card">
+            <div class="label">Dish or food item</div>
+            <div style="display:flex;gap:8px;">
+              <input type="text" id="dish-input" placeholder="e.g. Pad Thai, Chicken Tikka Masala…" onkeydown="if(event.key==='Enter')analyzeDish()">
+              <button class="btn btn-gold btn-sm" onclick="analyzeDish()">Analyze</button>
+            </div>
+            <div style="font-size:.62rem;color:var(--muted);margin-top:8px;letter-spacing:.5px;">AI will identify likely ingredients and flag each one for your profile</div>
+          </div>
+          <div id="dish-results"></div>
+        </div>
+
+        <!-- Restaurant mode -->
+        <div id="dining-rest-mode" style="display:none;">
+          <div class="card">
+            <div class="igroup">
+              <div class="label">Restaurant name</div>
+              <input type="text" id="rest-input" placeholder="e.g. Chipotle, Sweetgreen, local sushi spot…">
+            </div>
+            <div class="igroup">
+              <div class="label">Cuisine type (optional — helps if restaurant is unknown)</div>
+              <input type="text" id="rest-cuisine" placeholder="e.g. Japanese, Mexican, Thai, Italian…">
+            </div>
+            <button class="btn btn-gold btn-full" onclick="analyzeRestaurant()">Get Recommendations</button>
+          </div>
+          <div id="rest-results"></div>
+        </div>
+      </div>
+
+      <div style="height:28px;"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════ ABOUT ══════════════ -->
+  <div class="panel" id="panel-about">
+    <div class="panel-inner">
+      <div style="text-align:center;padding:20px 0 28px;">
+        <div style="font-family:'Playfair Display',serif;font-size:2rem;color:var(--gold);margin-bottom:6px;">Viativa</div>
+        <div style="font-size:.65rem;color:var(--muted);letter-spacing:4px;text-transform:uppercase;">via negativa · the path through subtraction</div>
+      </div>
+
+      <div class="card">
+        <div style="font-size:.88rem;line-height:1.8;color:var(--muted2);">
+          Viativa is built on the principle of <em style="color:var(--gold);">via negativa</em> — the idea that we often find the right path not by adding more, but by removing what harms us. Rather than telling you what to eat, Viativa helps you identify what to avoid based on your own body's signals.
+        </div>
+      </div>
+
+      <div class="sec">What Viativa does</div>
+      <div class="card">
+        <div style="font-size:.85rem;line-height:1.9;color:var(--muted2);">
+          Upload your IgG food sensitivity test results or enter your known restrictions. Viativa reads your profile and uses AI to analyze any dish or restaurant menu, flagging ingredients that may trigger a reaction for you specifically.
+        </div>
+      </div>
+
+      <div class="sec">Important disclaimer</div>
+      <div class="disclaimer" style="margin-bottom:0;">
+        Viativa is designed for food sensitivities and dietary optimization — not life-threatening allergies. IgG reactions are delayed immune responses that cause discomfort and inflammation, not anaphylaxis. If you have a severe allergy (peanuts, shellfish, etc.), always verify ingredients directly with the restaurant or food manufacturer. Viativa's AI analysis is a helpful guide, not a medical guarantee. Always consult your doctor or dietitian for medical dietary advice.
+      </div>
+
+      <div class="sec">How your data is stored</div>
+      <div class="card">
+        <div style="font-size:.85rem;line-height:1.9;color:var(--muted2);">
+          Your profile is stored securely in the cloud and identified by a unique ID on your device. No name or personal information is required. Your data is never shared or sold.
+        </div>
+      </div>
+
+      <div style="height:28px;"></div>
+    </div>
+  </div>
+
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════
+const SUPA_URL = 'https://tvnzznfzdxbftojwvlxp.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2bnp6bmZ6ZHhiZnRvand2bHhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwMTgzMTQsImV4cCI6MjA5MDU5NDMxNH0.zME2gde-ZbqkyeZQmAq_490Ni5XL2_vv1IvOBlIMBHI';
+const PROXY_URL = 'https://tvnzznfzdxbftojwvlxp.supabase.co/functions/v1/ai-proxy';
+
+// ═══════════════════════════════════════════════
+// USER ID — unique per device, stored locally
+// ═══════════════════════════════════════════════
+function getUserId() {
+  let id = localStorage.getItem('viativa_uid');
+  if (!id) {
+    id = 'user_' + Math.random().toString(36).slice(2,10) + Date.now().toString(36);
+    localStorage.setItem('viativa_uid', id);
+  }
+  return id;
+}
+const USER_ID = getUserId();
+
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+let profile = null; // {name, avoid:[], limit:[], notes, source}
+let uploadedFileData = null;
+let uploadedFileType = null;
+let selectedChips = new Set();
+let obMethod = 'manual';
+
+// ═══════════════════════════════════════════════
+// SUPABASE
+// ═══════════════════════════════════════════════
+async function supaFetch(method, table, body=null, match=null) {
+  let url = `${SUPA_URL}/rest/v1/${table}`;
+  if (match) url += `?${match}`;
+  const opts = {
+    method,
+    headers: {
+      'apikey': SUPA_KEY,
+      'Authorization': `Bearer ${SUPA_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': method==='POST' ? 'resolution=merge-duplicates,return=minimal' : 'return=minimal'
+    }
+  };
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(url, opts);
+  if (method==='GET') return r.json();
+  return r.ok;
+}
+
+async function saveProfile(p) {
+  profile = p;
+  localStorage.setItem('viativa_profile', JSON.stringify(p));
+  await supaFetch('POST', 'viativa_profiles', {
+    user_id: USER_ID,
+    name: p.name || '',
+    avoid: p.avoid,
+    limit_foods: p.limit,
+    notes: p.notes || '',
+    source: p.source || 'manual'
+  });
+}
+
+async function loadProfile() {
+  const local = localStorage.getItem('viativa_profile');
+  if (local) { profile = JSON.parse(local); return true; }
+  try {
+    const rows = await supaFetch('GET', 'viativa_profiles', null, `user_id=eq.${USER_ID}`);
+    if (Array.isArray(rows) && rows.length > 0) {
+      profile = {
+        name: rows[0].name,
+        avoid: rows[0].avoid,
+        limit_foods: rows[0].limit,
+        notes: rows[0].notes,
+        source: rows[0].source
+      };
+      localStorage.setItem('viativa_profile', JSON.stringify(profile));
+      return true;
+    }
+  } catch(e){}
+  return false;
+}
+
+// ═══════════════════════════════════════════════
+// AI
+// ═══════════════════════════════════════════════
+async function callAI(messages, maxTokens=800) {
+  const response = await fetch(PROXY_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${SUPA_KEY}`,
+      'apikey': SUPA_KEY
+    },
+    body: JSON.stringify({ max_tokens: maxTokens, messages })
+  });
+  const data = await response.json();
+  return data.content.map(c => c.text || '').join('').trim();
+}
+
+async function callAIWithImage(base64Data, mediaType, prompt, maxTokens=1000) {
+  const response = await fetch(PROXY_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${SUPA_KEY}`,
+      'apikey': SUPA_KEY
+    },
+    body: JSON.stringify({
+      max_tokens: maxTokens,
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64Data } },
+          { type: 'text', text: prompt }
+        ]
+      }]
+    })
+  });
+  const data = await response.json();
+  return data.content.map(c => c.text || '').join('').trim();
+}
+
+// ═══════════════════════════════════════════════
+// NAV
+// ═══════════════════════════════════════════════
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => switchTab(btn.dataset.panel));
+});
+
+function switchTab(panel) {
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelector(`[data-panel="${panel}"]`).classList.add('active');
+  document.getElementById('panel-'+panel).classList.add('active');
+  if (panel === 'dining') checkDiningAccess();
+}
+
+function goToProfile() { switchTab('profile'); }
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+// ═══════════════════════════════════════════════
+// ONBOARDING
+// ═══════════════════════════════════════════════
+function goToStep(step, method) {
+  document.querySelectorAll('.onboard-step').forEach(s => s.classList.remove('active'));
+  if (method) {
+    obMethod = method;
+    if (method === 'upload') {
+      document.getElementById('ob-step-1-upload').classList.add('active');
+    } else {
+      document.getElementById('ob-step-1-manual').classList.add('active');
+    }
+    document.getElementById('step1').classList.add('done');
+  } else {
+    document.getElementById('ob-step-0').classList.add('active');
+    document.getElementById('step1').classList.remove('done');
+    document.getElementById('step2').classList.remove('done');
+  }
+}
+
+// ═══════════════════════════════════════════════
+// CHIP SELECTION
+// ═══════════════════════════════════════════════
+function toggleChip(el) {
+  const val = el.dataset.val;
+  if (selectedChips.has(val)) {
+    selectedChips.delete(val);
+    el.classList.remove('selected');
+  } else {
+    selectedChips.add(val);
+    el.classList.add('selected');
+  }
+}
+
+// ═══════════════════════════════════════════════
+// MANUAL PROFILE
+// ═══════════════════════════════════════════════
+async function saveManualProfile() {
+  const extra = document.getElementById('manual-extra').value.trim();
+  const name = document.getElementById('manual-name').value.trim();
+  const chips = [...selectedChips];
+
+  if (chips.length === 0 && !extra) {
+    toast('Select at least one restriction');
+    return;
+  }
+
+  // Build avoid/limit from chips
+  const avoidMap = {
+    'dairy': ['milk','cheese','butter','cream','yogurt','casein','whey'],
+    'gluten': ['wheat','gluten','barley','rye','regular soy sauce'],
+    'eggs': ['egg white','egg yolk','eggs'],
+    'peanuts': ['peanuts','peanut butter','peanut sauce'],
+    'tree nuts': ['almonds','cashews','walnuts','pecans','pistachios','tree nuts'],
+    'soy': ['soy sauce','tofu','edamame','miso','tempeh','soy'],
+    'shellfish': ['shrimp','crab','lobster','scallops','clams','shellfish'],
+    'fish': ['fish','salmon','tuna','cod','tilapia'],
+    'corn': ['corn','corn syrup','cornstarch','popcorn'],
+    'nightshades': ['tomatoes','peppers','eggplant','potatoes','nightshades'],
+    'oats': ['oats','oatmeal'],
+    'refined sugar': ['white sugar','corn syrup','refined sugar','candy','soda'],
+    'alcohol': ['alcohol','wine','beer','spirits'],
+    'caffeine': ['coffee','tea','caffeine','energy drinks']
+  };
+
+  const avoid = [];
+  const limit = [];
+  chips.forEach(c => {
+    if (avoidMap[c]) avoid.push(...avoidMap[c]);
+  });
+
+  const p = {
+    name: name || 'User',
+    avoid,
+    limit,
+    notes: extra,
+    source: 'manual',
+    chips
+  };
+
+  await saveProfile(p);
+  renderProfileSummary();
+  toast('Profile saved!');
+}
+
+// ═══════════════════════════════════════════════
+// LAB UPLOAD
+// ═══════════════════════════════════════════════
+function handleLabUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  document.getElementById('upload-filename').textContent = file.name;
+  document.getElementById('upload-preview').style.display = 'block';
+  document.getElementById('upload-status').textContent = '';
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const result = e.target.result;
+    uploadedFileData = result.split(',')[1]; // base64
+    uploadedFileType = file.type;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function analyzeLabFile() {
+  if (!uploadedFileData) { toast('Please select a file first'); return; }
+
+  document.querySelectorAll('.onboard-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('ob-step-2').classList.add('active');
+  document.getElementById('step2').classList.add('done');
+
+  const prompt = `You are analyzing a food sensitivity or allergy lab report. Extract the following information and return ONLY valid JSON with no other text:
+
+{
+  "name": "patient first name if visible, otherwise empty string",
+  "avoid": ["list of foods/ingredients to avoid — Class 3/high reactions, IgE allergies, or anything marked as avoid/high/severe"],
+  "limit": ["list of foods/ingredients to limit — Class 2/moderate reactions or borderline results"],
+  "watch": ["list of foods with mild/Class 1 reactions"],
+  "notes": "brief summary of key findings in 1-2 sentences",
+  "source": "lab_upload"
+}
+
+Be thorough — extract every flagged food. For IgG tests, Class 3 = avoid, Class 2 = limit, Class 1 = watch.
+For standard allergy tests, positive/reactive = avoid, borderline = limit.
+Include specific ingredients (e.g. 'casein' not just 'dairy') when the report specifies them.`;
+
+  try {
+    let text;
+    if (uploadedFileType === 'application/pdf') {
+      // For PDF, use document type
+      const response = await fetch(PROXY_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPA_KEY}`,
+          'apikey': SUPA_KEY
+        },
+        body: JSON.stringify({
+          max_tokens: 1000,
+          messages: [{
+            role: 'user',
+            content: [
+              { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: uploadedFileData } },
+              { type: 'text', text: prompt }
+            ]
+          }]
+        })
+      });
+      const data = await response.json();
+      text = data.content.map(c => c.text || '').join('').trim();
+    } else {
+      text = await callAIWithImage(uploadedFileData, uploadedFileType, prompt, 1000);
+    }
+
+    const clean = text.replace(/```json|```/g, '').trim();
+    const result = JSON.parse(clean);
+
+    const p = {
+      name: result.name || 'User',
+      avoid: result.avoid || [],
+      limit_foods: result.limit || [],
+      watch: result.watch || [],
+      notes: result.notes || '',
+      source: 'lab_upload'
+    };
+
+    await saveProfile(p);
+    renderProfileSummary();
+    toast('Profile created from your results!');
+
+  } catch(e) {
+    document.getElementById('analyzing-content').innerHTML = `
+      <div class="card">
+        <div style="text-align:center;padding:16px;">
+          <div style="color:var(--amber);font-size:.85rem;margin-bottom:12px;">Could not read the file automatically.</div>
+          <div style="font-size:.78rem;color:var(--muted);margin-bottom:14px;">Try entering your restrictions manually instead.</div>
+          <button class="btn btn-gold" onclick="goToStep(1,'manual')">Enter Manually</button>
+        </div>
+      </div>`;
+  }
+}
+
+// ═══════════════════════════════════════════════
+// PROFILE DISPLAY
+// ═══════════════════════════════════════════════
+function renderProfileSummary() {
+  document.getElementById('onboarding').style.display = 'none';
+  document.getElementById('profile-summary').style.display = 'block';
+
+  document.getElementById('profile-name-display').textContent =
+    profile.name && profile.name !== 'User' ? `${profile.name}'s Profile` : 'Your Profile';
+  document.getElementById('profile-source-display').textContent =
+    profile.source === 'lab_upload' ? 'Imported from lab results' : 'Manually configured';
+
+  // Avoid list
+  const avoidEl = document.getElementById('profile-avoid-list');
+  if (profile.avoid && profile.avoid.length > 0) {
+    avoidEl.innerHTML = profile.avoid.map(f => `
+      <div class="profile-flag">
+        <div class="flag-dot" style="background:var(--red);"></div>
+        <div class="flag-name">${f}</div>
+        <div class="flag-level" style="color:var(--red);">avoid</div>
+      </div>`).join('');
+  } else {
+    avoidEl.innerHTML = '<div style="font-size:.78rem;color:var(--muted);">None specified</div>';
+  }
+
+  // Limit list
+  const limitEl = document.getElementById('profile-limit-list');
+  const limitItems = [...(profile.limit||[]), ...(profile.watch||[])];
+  if (limitItems.length > 0) {
+    limitEl.innerHTML = limitItems.map(f => `
+      <div class="profile-flag">
+        <div class="flag-dot" style="background:var(--amber);"></div>
+        <div class="flag-name">${f}</div>
+        <div class="flag-level" style="color:var(--amber);">limit</div>
+      </div>`).join('');
+  } else {
+    limitEl.innerHTML = '<div style="font-size:.78rem;color:var(--muted);">None specified</div>';
+  }
+
+  // Notes
+  document.getElementById('profile-notes-display').innerHTML =
+    profile.notes
+      ? `<div style="font-size:.82rem;color:var(--muted2);line-height:1.7;">${profile.notes}</div>`
+      : '<div style="font-size:.78rem;color:var(--muted);">No additional notes</div>';
+
+  // Update header chip
+  const chip = document.getElementById('profile-status');
+  chip.textContent = profile.name && profile.name !== 'User' ? profile.name : 'Profile ✓';
+  chip.classList.add('active');
+}
+
+function resetProfile() {
+  if (!confirm('Reset your profile? This cannot be undone.')) return;
+  profile = null;
+  localStorage.removeItem('viativa_profile');
+  document.getElementById('onboarding').style.display = 'block';
+  document.getElementById('profile-summary').style.display = 'none';
+  document.querySelectorAll('.onboard-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('ob-step-0').classList.add('active');
+  selectedChips.clear();
+  document.querySelectorAll('.r-chip').forEach(c => c.classList.remove('selected'));
+  document.getElementById('profile-status').textContent = 'No profile';
+  document.getElementById('profile-status').classList.remove('active');
+  toast('Profile reset');
+}
+
+// ═══════════════════════════════════════════════
+// DINING
+// ═══════════════════════════════════════════════
+function checkDiningAccess() {
+  if (!profile) {
+    document.getElementById('dining-no-profile').style.display = 'block';
+    document.getElementById('dining-content').style.display = 'none';
+  } else {
+    document.getElementById('dining-no-profile').style.display = 'none';
+    document.getElementById('dining-content').style.display = 'block';
+  }
+}
+
+function setDiningMode(mode) {
+  document.getElementById('dining-dish-mode').style.display = mode === 'dish' ? 'block' : 'none';
+  document.getElementById('dining-rest-mode').style.display = mode === 'restaurant' ? 'block' : 'none';
+  document.getElementById('mode-dish-btn').className = `btn btn-full ${mode==='dish'?'btn-gold':'btn-ghost'}`;
+  document.getElementById('mode-rest-btn').className = `btn btn-full ${mode==='restaurant'?'btn-gold':'btn-ghost'}`;
+}
+
+function buildProfileContext() {
+  const avoid = (profile.avoid||[]).join(', ');
+  const limit = [...(profile.limit||[]), ...(profile.watch||[])].join(', ');
+  const notes = profile.notes || '';
+  return `User's dietary profile:
+- AVOID: ${avoid || 'none specified'}
+- LIMIT: ${limit || 'none specified'}
+- Additional notes: ${notes || 'none'}`;
+}
+
+function flagColor(flag) {
+  if (flag === 'avoid') return 'var(--red)';
+  if (flag === 'caution') return 'var(--amber)';
+  if (flag === 'good') return 'var(--green)';
+  return 'var(--muted)';
+}
+
+function flagLabel(flag) {
+  if (flag === 'avoid') return 'avoid';
+  if (flag === 'caution') return 'limit';
+  if (flag === 'good') return 'good';
+  return '—';
+}
+
+async function analyzeDish() {
+  const dish = document.getElementById('dish-input').value.trim();
+  if (!dish) return;
+  if (!profile) { toast('Set up your profile first'); return; }
+
+  const el = document.getElementById('dish-results');
+  el.innerHTML = '<div class="card"><div class="ai-loading">Analyzing ingredients</div></div>';
+
+  const profileCtx = buildProfileContext();
+
+  const prompt = `${profileCtx}
+
+Analyze this dish: "${dish}"
+
+List the typical ingredients. For each, check if it conflicts with the user's restrictions above.
+
+Reply ONLY in this JSON format:
+{
+  "dish": "dish name",
+  "verdict": "avoid|caution|good|neutral",
+  "summary": "one sentence about how this fits the user's diet",
+  "ingredients": [
+    {"name": "ingredient", "flag": "avoid|caution|good|neutral", "reason": "brief reason if flagged"}
+  ],
+  "tips": "one practical tip for ordering or modifying"
+}`;
+
+  try {
+    const text = await callAI([{role:'user', content: prompt}], 700);
+    const clean = text.replace(/```json|```/g, '').trim();
+    const result = JSON.parse(clean);
+    renderDishResult(result);
+  } catch(e) {
+    el.innerHTML = '<div class="card"><div class="empty">Could not analyze. Try being more specific.</div></div>';
+  }
+}
+
+function renderDishResult(result) {
+  const el = document.getElementById('dish-results');
+  const vc = flagColor(result.verdict);
+
+  const ingsHTML = result.ingredients.map(ing => `
+    <div class="ingredient-row">
+      <div class="ing-name">${ing.name}</div>
+      <span class="tag tag-${ing.flag==='avoid'?'avoid':ing.flag==='caution'?'caution':ing.flag==='good'?'good':'neutral'}">${flagLabel(ing.flag)}</span>
+      ${ing.reason ? `<div class="ing-reason">${ing.reason}</div>` : ''}
+    </div>`).join('');
+
+  el.innerHTML = `
+    <div class="card" style="border-left:3px solid ${vc};">
+      <div class="dish-verdict">
+        <div class="verdict-name">${result.dish}</div>
+        <span class="tag tag-${result.verdict==='avoid'?'avoid':result.verdict==='caution'?'caution':result.verdict==='good'?'good':'neutral'}" style="font-size:.72rem;">${result.verdict.toUpperCase()}</span>
+      </div>
+      <div class="dish-summary">${result.summary}</div>
+      <div style="border-top:1px solid var(--border);padding-top:10px;">${ingsHTML}</div>
+      ${result.tips ? `<div class="dish-tip">💡 ${result.tips}</div>` : ''}
+    </div>`;
+}
+
+async function analyzeRestaurant() {
+  const rest = document.getElementById('rest-input').value.trim();
+  const cuisine = document.getElementById('rest-cuisine').value.trim();
+  if (!rest) return;
+  if (!profile) { toast('Set up your profile first'); return; }
+
+  const el = document.getElementById('rest-results');
+  el.innerHTML = '<div class="card"><div class="ai-loading">Finding best options</div></div>';
+
+  const profileCtx = buildProfileContext();
+
+  const prompt = `${profileCtx}
+
+Restaurant: "${rest}"${cuisine ? ` (${cuisine} cuisine)` : ''}
+
+Based on what you know about this restaurant or cuisine type, recommend the 3 best dishes to order and 2-3 dishes to avoid, based specifically on the user's restrictions above.
+
+Reply ONLY in this JSON format:
+{
+  "restaurant": "name",
+  "cuisine": "cuisine type",
+  "note": "one sentence about this restaurant/cuisine for this user's restrictions",
+  "order": [
+    {"dish": "name", "why": "brief reason it works for their restrictions", "tip": "modification to request or empty string"}
+  ],
+  "avoid": [
+    {"dish": "name", "why": "brief reason to avoid"}
+  ]
+}`;
+
+  try {
+    const text = await callAI([{role:'user', content: prompt}], 800);
+    const clean = text.replace(/```json|```/g, '').trim();
+    const result = JSON.parse(clean);
+    renderRestaurantResult(result);
+  } catch(e) {
+    el.innerHTML = '<div class="card"><div class="empty">Could not find recommendations. Try adding the cuisine type.</div></div>';
+  }
+}
+
+function renderRestaurantResult(result) {
+  const el = document.getElementById('rest-results');
+
+  const orderHTML = result.order.map(d => `
+    <div class="rec-dish">
+      <div class="rec-dish-name">${d.dish}</div>
+      <div class="rec-why">${d.why}</div>
+      ${d.tip ? `<div class="rec-tip">💡 Ask: ${d.tip}</div>` : ''}
+      <button class="btn btn-ghost btn-sm" style="margin-top:8px;" onclick="prefillDish('${d.dish.replace(/'/g,'')}')">Analyze ingredients →</button>
+    </div>`).join('');
+
+  const avoidHTML = result.avoid.map(d => `
+    <div class="avoid-dish">
+      <div style="color:var(--red);font-size:.8rem;flex-shrink:0;">✕</div>
+      <div>
+        <div style="font-size:.85rem;font-weight:500;">${d.dish}</div>
+        <div style="font-size:.72rem;color:var(--muted);margin-top:2px;">${d.why}</div>
+      </div>
+    </div>`).join('');
+
+  el.innerHTML = `
+    <div class="card" style="margin-bottom:10px;">
+      <div style="font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:3px;">${result.restaurant}</div>
+      <div style="font-size:.65rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">${result.cuisine}</div>
+      <div style="font-size:.78rem;color:var(--muted2);line-height:1.5;">${result.note}</div>
+    </div>
+    <div class="sec">Order These</div>
+    ${orderHTML}
+    <div class="sec">Skip These</div>
+    <div class="card">${avoidHTML}</div>`;
+}
+
+function prefillDish(name) {
+  document.getElementById('dish-input').value = name;
+  setDiningMode('dish');
+  analyzeDish();
+}
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+async function init() {
+  const hasProfile = await loadProfile();
+  if (hasProfile && profile) {
+    renderProfileSummary();
+  } else {
+    document.getElementById('onboarding').style.display = 'block';
+    document.getElementById('ob-step-0').classList.add('active');
+  }
+}
+
+init();
+</script>
+</body>
+</html>
