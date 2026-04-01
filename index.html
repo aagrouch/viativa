@@ -81,6 +81,7 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
 .tag-caution{background:rgba(230,126,34,.15);color:#e67e22;border:1px solid rgba(230,126,34,.3);}
 .tag-good{background:rgba(39,174,96,.15);color:#2ecc71;border:1px solid rgba(39,174,96,.3);}
 .tag-neutral{background:var(--s3);color:var(--muted2);border:1px solid var(--border);}
+.tag-target{background:rgba(22,160,133,.15);color:#1abc9c;border:1px solid rgba(22,160,133,.3);}
 
 /* RESTRICTION CHIPS */
 .restriction-grid{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0;}
@@ -261,6 +262,30 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
             <div class="label">Any other restrictions or notes</div>
             <textarea id="manual-extra" placeholder="e.g. Low FODMAP, high blood pressure, borderline diabetes, specific foods to avoid…"></textarea>
           </div>
+
+          <div style="border-top:1px solid var(--border);margin:14px 0;"></div>
+          <div class="sec" style="margin-top:0;">Foods to Target</div>
+          <div class="igroup">
+            <div class="label">Health goals — tap to select</div>
+            <div class="restriction-grid" id="target-goals">
+              <div class="r-chip" data-val="anti-inflammatory" data-type="goal" onclick="toggleTargetChip(this)">Anti-inflammatory</div>
+              <div class="r-chip" data-val="blood sugar stability" data-type="goal" onclick="toggleTargetChip(this)">Blood Sugar Stability</div>
+              <div class="r-chip" data-val="heart health" data-type="goal" onclick="toggleTargetChip(this)">Heart Health</div>
+              <div class="r-chip" data-val="gut health" data-type="goal" onclick="toggleTargetChip(this)">Gut Health</div>
+              <div class="r-chip" data-val="high protein" data-type="goal" onclick="toggleTargetChip(this)">High Protein</div>
+              <div class="r-chip" data-val="omega-3 rich" data-type="goal" onclick="toggleTargetChip(this)">Omega-3 Rich</div>
+              <div class="r-chip" data-val="antioxidants" data-type="goal" onclick="toggleTargetChip(this)">Antioxidants</div>
+              <div class="r-chip" data-val="low sodium" data-type="goal" onclick="toggleTargetChip(this)">Low Sodium</div>
+              <div class="r-chip" data-val="weight management" data-type="goal" onclick="toggleTargetChip(this)">Weight Management</div>
+              <div class="r-chip" data-val="brain health" data-type="goal" onclick="toggleTargetChip(this)">Brain Health</div>
+            </div>
+          </div>
+          <div class="igroup">
+            <div class="label">Specific foods to emphasize (optional)</div>
+            <input type="text" id="target-foods" placeholder="e.g. leafy greens, fatty fish, blueberries, avocado…">
+          </div>
+
+          <div style="border-top:1px solid var(--border);margin:14px 0;"></div>
           <div class="igroup">
             <div class="label">Your name (optional)</div>
             <input type="text" id="manual-name" placeholder="First name">
@@ -295,6 +320,9 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
 
         <div class="sec">Foods to Limit</div>
         <div class="card" id="profile-limit-list"></div>
+
+        <div class="sec">Foods to Target</div>
+        <div class="card" id="profile-targets-display"></div>
 
         <div class="sec">Notes</div>
         <div class="card" id="profile-notes-display"></div>
@@ -426,6 +454,7 @@ let profile = null; // {name, avoid:[], limit:[], notes, source}
 let uploadedFileData = null;
 let uploadedFileType = null;
 let selectedChips = new Set();
+let selectedTargetChips = new Set();
 let obMethod = 'manual';
 
 // ═══════════════════════════════════════════════
@@ -457,6 +486,8 @@ async function saveProfile(p) {
     name: p.name || '',
     avoid: p.avoid,
     limit_foods: p.limit,
+    targets: p.targets || [],
+    target_goals: p.targetGoals || [],
     notes: p.notes || '',
     source: p.source || 'manual'
   });
@@ -471,11 +502,11 @@ async function loadProfile() {
       profile = {
         name: rows[0].name,
         avoid: rows[0].avoid,
-        limit_foods: rows[0].limit,
-        notes: rows[0].notes,
+        limit: rows[0].limit_foods,
+        targets: rows[0].targets || [],
+        targetGoals: rows[0].target_goals || [],
         source: rows[0].source
       };
-      localStorage.setItem('viativa_profile', JSON.stringify(profile));
       return true;
     }
   } catch(e){}
@@ -580,20 +611,45 @@ function toggleChip(el) {
   }
 }
 
+function toggleTargetChip(el) {
+  const val = el.dataset.val;
+  if (selectedTargetChips.has(val)) {
+    selectedTargetChips.delete(val);
+    el.classList.remove('selected');
+  } else {
+    selectedTargetChips.add(val);
+    el.classList.add('selected');
+  }
+}
+
 // ═══════════════════════════════════════════════
 // MANUAL PROFILE
 // ═══════════════════════════════════════════════
+const GOAL_FOODS = {
+  'anti-inflammatory': ['fatty fish','salmon','sardines','mackerel','turmeric','ginger','leafy greens','olive oil','blueberries','walnuts','broccoli','avocado'],
+  'blood sugar stability': ['fiber-rich vegetables','legumes','lean protein','nuts','seeds','leafy greens','whole grains'],
+  'heart health': ['fatty fish','olive oil','avocado','walnuts','flaxseed','oats','berries','dark chocolate'],
+  'gut health': ['fermented foods','kimchi','sauerkraut','kefir','fiber','prebiotic foods','garlic','onion','asparagus'],
+  'high protein': ['chicken','turkey','fish','eggs','legumes','tofu','Greek yogurt','lean beef'],
+  'omega-3 rich': ['salmon','sardines','mackerel','anchovies','walnuts','flaxseed','chia seeds','herring'],
+  'antioxidants': ['blueberries','dark chocolate','green tea','spinach','kale','tomatoes','pomegranate','beets'],
+  'low sodium': ['fresh vegetables','fresh fruit','unsalted nuts','fresh fish','herbs and spices'],
+  'weight management': ['lean protein','fiber-rich vegetables','legumes','whole grains','water-rich foods'],
+  'brain health': ['fatty fish','walnuts','blueberries','dark chocolate','turmeric','broccoli','eggs','green tea']
+};
+
 async function saveManualProfile() {
   const extra = document.getElementById('manual-extra').value.trim();
   const name = document.getElementById('manual-name').value.trim();
+  const targetFoods = document.getElementById('target-foods').value.trim();
   const chips = [...selectedChips];
+  const targetChips = [...selectedTargetChips];
 
-  if (chips.length === 0 && !extra) {
-    toast('Select at least one restriction');
+  if (chips.length === 0 && !extra && targetChips.length === 0 && !targetFoods) {
+    toast('Add at least one restriction or target');
     return;
   }
 
-  // Build avoid/limit from chips
   const avoidMap = {
     'dairy': ['milk','cheese','butter','cream','yogurt','casein','whey'],
     'gluten': ['wheat','gluten','barley','rye','regular soy sauce'],
@@ -612,15 +668,21 @@ async function saveManualProfile() {
   };
 
   const avoid = [];
-  const limit = [];
-  chips.forEach(c => {
-    if (avoidMap[c]) avoid.push(...avoidMap[c]);
-  });
+  chips.forEach(c => { if (avoidMap[c]) avoid.push(...avoidMap[c]); });
+
+  // Build targets from goal chips + specific foods
+  const targetFoodsList = [];
+  targetChips.forEach(g => { if (GOAL_FOODS[g]) targetFoodsList.push(...GOAL_FOODS[g]); });
+  if (targetFoods) {
+    targetFoods.split(',').map(f=>f.trim()).filter(Boolean).forEach(f => targetFoodsList.push(f));
+  }
 
   const p = {
     name: name || 'User',
     avoid,
-    limit,
+    limit: [],
+    targets: [...new Set(targetFoodsList)],
+    targetGoals: targetChips,
     notes: extra,
     source: 'manual',
     chips
@@ -767,6 +829,30 @@ function renderProfileSummary() {
     limitEl.innerHTML = '<div style="font-size:.78rem;color:var(--muted);">None specified</div>';
   }
 
+  // Targets
+  const targetsEl = document.getElementById('profile-targets-display');
+  const targets = profile.targets || [];
+  const targetGoals = profile.targetGoals || [];
+  if (targets.length > 0 || targetGoals.length > 0) {
+    let targetsHTML = '';
+    if (targetGoals.length > 0) {
+      targetsHTML += `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:${targets.length>0?'10px':'0'};">` +
+        targetGoals.map(g => `<span style="padding:3px 10px;border-radius:20px;font-size:.68rem;background:rgba(22,160,133,.15);color:#1abc9c;border:1px solid rgba(22,160,133,.3);">${g}</span>`).join('') +
+        '</div>';
+    }
+    if (targets.length > 0) {
+      targetsHTML += targets.slice(0,12).map(f => `
+        <div class="profile-flag">
+          <div class="flag-dot" style="background:var(--teal);"></div>
+          <div class="flag-name">${f}</div>
+          <div class="flag-level" style="color:var(--teal);">target</div>
+        </div>`).join('');
+    }
+    targetsEl.innerHTML = targetsHTML;
+  } else {
+    targetsEl.innerHTML = '<div style="font-size:.78rem;color:var(--muted);">No targets set</div>';
+  }
+
   // Notes
   document.getElementById('profile-notes-display').innerHTML =
     profile.notes
@@ -817,11 +903,15 @@ function setDiningMode(mode) {
 function buildProfileContext() {
   const avoid = (profile.avoid||[]).join(', ');
   const limit = [...(profile.limit||[]), ...(profile.watch||[])].join(', ');
+  const targets = (profile.targets||[]).join(', ');
+  const targetGoals = (profile.targetGoals||[]).join(', ');
   const notes = profile.notes || '';
-  return `User's dietary profile:
-- AVOID: ${avoid || 'none specified'}
-- LIMIT: ${limit || 'none specified'}
-- Additional notes: ${notes || 'none'}`;
+  return `User dietary profile:
+- AVOID (sensitivity/allergy): ${avoid || 'none'}
+- LIMIT (moderate sensitivity): ${limit || 'none'}
+- TARGET FOODS to emphasize: ${targets || 'none'}
+- HEALTH GOALS: ${targetGoals || 'none'}
+- Notes: ${notes || 'none'}`;
 }
 
 function flagColor(flag) {
@@ -834,6 +924,7 @@ function flagColor(flag) {
 function flagLabel(flag) {
   if (flag === 'avoid') return 'avoid';
   if (flag === 'caution') return 'limit';
+  if (flag === 'target') return '✦ target';
   if (flag === 'good') return 'good';
   return '—';
 }
@@ -852,15 +943,20 @@ async function analyzeDish() {
 
 Analyze this dish: "${dish}"
 
-List the typical ingredients. For each, check if it conflicts with the user's restrictions above.
+List the typical ingredients. For each:
+- flag as "avoid" if it conflicts with AVOID list
+- flag as "caution" if it conflicts with LIMIT list
+- flag as "target" if it matches TARGET FOODS or HEALTH GOALS
+- flag as "good" if it is generally healthy with no conflicts
+- flag as "neutral" otherwise
 
 Reply ONLY in this JSON format:
 {
   "dish": "dish name",
   "verdict": "avoid|caution|good|neutral",
-  "summary": "one sentence about how this fits the user's diet",
+  "summary": "one sentence about how this fits the user's diet — mention targets hit if any",
   "ingredients": [
-    {"name": "ingredient", "flag": "avoid|caution|good|neutral", "reason": "brief reason if flagged"}
+    {"name": "ingredient", "flag": "avoid|caution|target|good|neutral", "reason": "brief reason"}
   ],
   "tips": "one practical tip for ordering or modifying"
 }`;
@@ -882,7 +978,7 @@ function renderDishResult(result) {
   const ingsHTML = result.ingredients.map(ing => `
     <div class="ingredient-row">
       <div class="ing-name">${ing.name}</div>
-      <span class="tag tag-${ing.flag==='avoid'?'avoid':ing.flag==='caution'?'caution':ing.flag==='good'?'good':'neutral'}">${flagLabel(ing.flag)}</span>
+      <span class="tag tag-${ing.flag==='avoid'?'avoid':ing.flag==='caution'?'caution':ing.flag==='target'?'target':ing.flag==='good'?'good':'neutral'}">${flagLabel(ing.flag)}</span>
       ${ing.reason ? `<div class="ing-reason">${ing.reason}</div>` : ''}
     </div>`).join('');
 
